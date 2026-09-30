@@ -568,6 +568,20 @@ st.html(
         margin-top: 10px;
     }
 
+    .qty-number {
+        color: #111827;
+        background: white;
+        border: 1px solid #D1D5DB;
+        border-radius: 10px;
+        min-height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 800;
+        margin-top: 1px;
+    }
+
 
     /* =====================================================
        OFFER
@@ -1244,13 +1258,13 @@ with product_area:
                 """
             )
 
+            product_id = product["id"]
+
             if st.button(
                 "＋ Add to Cart",
-                key=f"add_{product['id']}",
+                key=f"add_{product_id}",
                 use_container_width=True
             ):
-
-                product_id = product["id"]
 
                 if product_id not in st.session_state.cart:
                     st.session_state.cart[product_id] = 1
@@ -1260,6 +1274,42 @@ with product_area:
                 st.toast(
                     f"{product['name']} added to cart!"
                 )
+                st.rerun()
+
+            # Quantity controls appear directly below each product.
+            current_quantity = st.session_state.cart.get(product_id, 0)
+
+            if current_quantity > 0:
+
+                qty_left, qty_number, qty_right = st.columns([1, 1, 1])
+
+                with qty_left:
+                    if st.button(
+                        "−",
+                        key=f"product_minus_{product_id}",
+                        use_container_width=True
+                    ):
+                        if current_quantity > 1:
+                            st.session_state.cart[product_id] -= 1
+                        else:
+                            del st.session_state.cart[product_id]
+                        st.rerun()
+
+                with qty_number:
+                    st.markdown(
+                        f'<div class="qty-number">{current_quantity}</div>',
+                        unsafe_allow_html=True
+                    )
+
+                with qty_right:
+                    if st.button(
+                        "+",
+                        key=f"product_plus_{product_id}",
+                        use_container_width=True
+                    ):
+                        st.session_state.cart[product_id] += 1
+                        st.rerun()
+
 
 
 # ============================================================
@@ -1347,45 +1397,6 @@ with cart_area:
                 f"₹{product['price']} × {quantity} = "
                 f"₹{item['subtotal']}"
             )
-
-            q1, q2, q3 = st.columns(3)
-
-            with q1:
-
-                if st.button(
-                    "−",
-                    key=f"minus_{product['id']}"
-                ):
-
-                    if quantity > 1:
-                        st.session_state.cart[
-                            product["id"]
-                        ] -= 1
-                    else:
-                        del st.session_state.cart[
-                            product["id"]
-                        ]
-
-                    st.rerun()
-
-            with q2:
-
-                st.write(
-                    f"**{quantity}**"
-                )
-
-            with q3:
-
-                if st.button(
-                    "+",
-                    key=f"plus_{product['id']}"
-                ):
-
-                    st.session_state.cart[
-                        product["id"]
-                    ] += 1
-
-                    st.rerun()
 
             st.divider()
 
